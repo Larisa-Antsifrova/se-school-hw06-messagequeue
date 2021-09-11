@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "SES HomeWork 06 - Message Broker.",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js | bunyan",
     "start:dev": "nodemon server.js | bunyan",
     "test": "jest --coverage",
     "test:postman": "newman run tests_postman/se-school-hw03-testing.postman_collection.json -x -r cli,htmlextra --delay-request 1000 --verbose"
