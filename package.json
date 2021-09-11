@@ -11,6 +11,7 @@
   "author": "Larisa A.",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.8.0",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "bunyan": "^1.8.15",
