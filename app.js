@@ -21,9 +21,11 @@ app.use(homeRouter);
 app.use(userRouter);
 app.use(btcRouter);
 
-apiLogger.consumeLog(LogTypes.error, LogTypes.info, LogTypes.debug);
+apiLogger.consumeLog(LogTypes.error);
 
 app.use((req, res) => {
+  apiLogger.publishLog(LogTypes.info, Messages.notFound);
+
   return res.status(HttpCodes.NOT_FOUND).json({ message: Messages.notFound });
 });
 

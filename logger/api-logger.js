@@ -9,7 +9,6 @@ class ApiLogger {
 
   async publishLog(logType, logMessage) {
     const [channel, connection] = await this.establishConnection();
-
     channel.publish(this.exchangeName, logType, Buffer.from(logMessage));
 
     this.closeConnection(connection);
