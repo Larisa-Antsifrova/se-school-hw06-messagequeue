@@ -8,58 +8,68 @@ This REST API web server app provides basic features:
 - logging existing users in
 - showing current BTC to UAH rate to authorized users
 
-The db files are commited for example purposes.
-
-The homework's goal is:
+The homework's goal:
 
 - to implement logs handling using RabbitMQ
+- only Error level logs are expected in stdout
 
 The homework's motto:
 
-- _Comming soon_
+- _If something complicated is not working, make it simpler._
 
 ## Note to code reviewer
 
 Hi Oleksandr!  
 &nbsp;  
-IN PROGRESS...
+Thank you for the homework task! That was something completely new to learn and try. I hope I got the task right :)  
+&nbsp;  
+At the moment there is a class ApiLogger (in logger folder) that has two methods: one for publishing a log and another for consuming logs.  
+The consumer is called in the app.js file and starts listening to any incoming messages with the routing key provided as a parameter.  
+Since the application has central error handling, the publisher is created in this central handler in app.js. Thus, when an error occurs it is eventually caught by the handler where the publisher publishes the new error log to the exchange.  
+&nbsp;  
+I do think there should be more graceful ways to implement the task :) I will be glad to hear any feedback and recommendations.  
+&nbsp;  
+Happy reviewing!
 
 ## Setting up the app locally
 
 1. Clone the repository:
 
 ```
-      git clone https://github.com/Larisa-Antsifrova/se-school-hw03-testing.git
+      git clone https://github.com/Larisa-Antsifrova/se-school-hw06-messagequeue.git
 ```
 
 2. Go to the cloned project folder:
 
 ```
-      cd se-school-hw03-testing
+      cd se-school-hw06-messagequeue
 ```
 
-3. Create .env file. Declare env variables for JWT and rates provider:
+3. Create .env file. Declare env variables as per .env.example file:
 
 ```
-      JWT_SECRET_KEY={custom secret key for JWT sign: any string}
+      JWT_SECRET_KEY={random secret string for JWT sign}
 
-      COINLAYER_API_KEY={api key for coinlayer rates api}
+      COINLAYER_API_KEY={api key for Coinlayer bitcoin rates api}
+
+      RABBITMQ_URL={rabbitmq cloud connection link}
 ```
 
-4. Install dependencies:
+4. Build docker image:
 
 ```
-      npm i
+      docker build -t webapiapp .
 ```
 
-5. Start the app in development mode:
+5. Run docker container:
 
 ```
-      npm run start:dev
+      docker run -d  -p 8877:8877 webapiapp
 ```
 
+6. Go to http://localhost:8877 in a browser. Expected result is [welcome message](#home-endpoint-response).
 
-## Endpoints
+## Endpoints to explore
 
 ### / - Home
 
@@ -90,11 +100,11 @@ ResponseBody: {
 
 Registers new users.
 
-- Name, email and password are required.
+- Name, email, and password are required.
 - The fields are validated with Joi library.
 - If the email is already in use, the error of conflict is returned.
-- If validation is successful and email is unique, the password is hashed and the new user is saved in database.
-- No authentication token is returned in case verification stage will be added (for example, verification via e-mail).
+- If validation is successful and the email is unique, the password is hashed and the new user is saved in the database.
+- No authentication token is returned in case the verification stage will be added (for example, verification via e-mail).
 
 #### Registration request
 
@@ -150,9 +160,9 @@ Authenticates a user.
 
 - Email and password are required.
 - The fields are validated only for their presence.
-- If a user with the provided e-mail and/or password does not exist in database, general error message is returned.
+- If a user with the provided e-mail and/or password does not exist in the database, a general error message is returned.
 - If validation is successful and credentials are right, the JSON Web Token is created and returned.
-- JWT has limited life span.
+- JWT has a limited life span.
 
 #### Login request
 
@@ -213,7 +223,7 @@ Provides current rate of BTC to UAH.
 
 - The endpoint is available only for authenticated users.
 - isAuthenticated middleware verifies JWT in Authorization header (Bearer token).
-- If the provided JWT is valid the endpoint returns current rate of 1 BTC to UAH.
+- If the provided JWT is valid the endpoint returns the current rate of 1 BTC to UAH.
 - [Coinlayer API](https://coinlayer.com/documentation) is used to get the rate.
 
 #### Current BTC to UAH rate request
@@ -242,26 +252,26 @@ ResponseBody: {
 
 ## Structure
 
-| File/Folder     | Description                                                        | Example                                               |
-| :-------------- | :----------------------------------------------------------------- | :---------------------------------------------------- |
-| app.js          | Project's app starting point                                       | -                                                     |
-| server.js       | Project's server set up and listening                              | -                                                     |
-| configs         | Configurations of specific service classes and api characteristics | validation-config, repository-config, services-config |
-| controllers     | Endpoints' handlers                                                | home-controllers, user-controllers                    |
-| db              | Two file system databases: for testing and for development         | test-db                                               |
-| docs            | Application's desired architecture diagram                         | web-btc-api-arch                                      |
-| exceptions      | Class to generate custom api errors                                | api-errors                                            |
-| fs_odm          | Layer to word directly with file system                            | fs-db-mapper                                          |
-| helpers         | Project's constants                                                | HTTP codes, Messages                                  |
-| http            | Configured axios client                                            | axios-coinlayer                                       |
-| middleware      | Middleware functions                                               | isAuthenticated, validation                           |
-| rates_providers | Configured providers of rates                                      | coinlayer-provider                                    |
-| repositories    | CRUD methods to work with database collections                     | users-repository                                      |
-| routes          | Endpoints                                                          | /user/create, /user/login                             |
-| services        | Classes to work with app's services                                | auth-service, password-service                        |
-| tests           | Unit and integration tests                                         | auth-service.test, password-service.test              |
-| tests_postman   | Tests for Postman collection                                       | postman-collection                                    |
-| .example.env    | Info about expected environment variables                          | JWT_SECRET_KEY                                        |
+| File/Folder     | Description                                                        |
+| :-------------- | :----------------------------------------------------------------- |
+| app.js          | Project's app starting point                                       |
+| server.js       | Project's server set up and listening                              |
+| configs         | Configurations of specific service classes and api characteristics |
+| controllers     | Endpoints' handlers                                                |
+| db              | Two file system databases: for testing and development             |
+| exceptions      | Class to generate custom api errors                                |
+| fs_odm          | Layer to word directly with file system                            |
+| helpers         | Project's constants                                                |
+| http            | Configured axios client                                            |
+| logger          | Class of api logger                                                |
+| middleware      | Middleware functions                                               |
+| rates_providers | Configured providers of rates                                      |
+| repositories    | CRUD methods to work with database collections                     |
+| routes          | Endpoints                                                          |
+| services        | Classes to work with app's services                                |
+| tests           | Unit and integration tests                                         |
+| tests_postman   | Tests for Postman collection                                       |
+| .example.env    | Info about expected environment variables                          |
 
 ## Tools
 
@@ -279,6 +289,7 @@ ResponseBody: {
 - [newman](https://www.npmjs.com/package/newman) - for launching authomated tests in cli.
 - [newman-reporter-htmlextra](https://www.npmjs.com/package/newman-reporter-htmlextra) - for generating automated tests report.
 - [IDE Jest extention](https://github.com/jest-community/vscode-jest) - for tracking running tests while typing.
+- [Docker](https://docs.docker.com/) - for spinning up a container with the app.
 
 ## Resources
 
@@ -288,5 +299,6 @@ Rates provider:
 
 Message Queue:
 
-- IN PROGRESS...
-
+- [RabbitMQ Docs](https://www.rabbitmq.com/documentation.html)
+- [RabbitMQ Tutorials: Routing](https://www.rabbitmq.com/tutorials/tutorial-four-javascript.html)
+- [CloudAMQP](https://www.cloudamqp.com/)
