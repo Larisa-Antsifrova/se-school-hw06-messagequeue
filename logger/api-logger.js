@@ -15,18 +15,20 @@ class ApiLogger {
     this.closeConnection(connection);
   }
 
-  async consumeLog(logType = 'error') {
+  async consumeLog(...logTypes) {
     const [channel] = await this.establishConnection();
 
     const q = await channel.assertQueue('', { exclusive: true });
 
-    channel.bindQueue(q.queue, this.exchangeName, logType);
+    logTypes.forEach(logType =>
+      channel.bindQueue(q.queue, this.exchangeName, logType),
+    );
 
     channel.consume(
       q.queue,
       message => {
         if (message.content) {
-          this.logger[logType](message.content.toString());
+          this.logger[message.fields.routingKey](message.content.toString());
         }
       },
       { noAck: true },
@@ -46,7 +48,6 @@ class ApiLogger {
   closeConnection(connection) {
     setTimeout(() => {
       connection.close();
-      process.exit(0);
     }, 500);
   }
 }
