@@ -102,3 +102,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+# VSCode settings
+.vscode/
+
+# newman reporters
+newman/
+
+# further changes in db files
+db/
