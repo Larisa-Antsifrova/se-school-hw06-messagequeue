@@ -8,7 +8,8 @@ const btcRouter = require('./routes/btc-routes');
 
 const { ApiLimiterConfig } = require('./configs/api-limiter-config');
 const { Limits } = require('./configs/limits-config');
-const { HttpCodes, Messages } = require('./helpers/constants');
+const apiLogger = require('./configs/logger-config');
+const { HttpCodes, Messages, LogTypes } = require('./helpers/constants');
 
 const app = express();
 
@@ -20,12 +21,18 @@ app.use(homeRouter);
 app.use(userRouter);
 app.use(btcRouter);
 
+apiLogger.consumeLog(LogTypes.error);
+
 app.use((req, res) => {
+  apiLogger.publishLog(LogTypes.info, Messages.notFound);
+
   return res.status(HttpCodes.NOT_FOUND).json({ message: Messages.notFound });
 });
 
 app.use((err, req, res, next) => {
   const status = err.status || HttpCodes.INTERNAL_SERVER_ERROR;
+
+  apiLogger.publishLog(LogTypes.error, err.message);
 
   return res.status(status).json({
     message: err.message,
