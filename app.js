@@ -22,8 +22,6 @@ app.use(userRouter);
 app.use(btcRouter);
 
 apiLogger.consumeLog();
-apiLogger.consumeLog('debug');
-apiLogger.consumeLog('info');
 
 app.use((req, res) => {
   return res.status(HttpCodes.NOT_FOUND).json({ message: Messages.notFound });
